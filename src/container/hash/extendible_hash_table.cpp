@@ -127,7 +127,13 @@ void ExtendibleHashTable<K, V>::Insert(const K &key, const V &value) {
     }
 
     // 将原先指向 old_bucket 的 dir 根据新的 local_depth 重新分配指向
+    // 兄弟指针可能比 index 大，也可能比 index 小
     // 如果 dir.index 在增长的那一位为 1，则指向新的 bucket
+    for (size_t i = index; (int)i >= new_high_bit_mask; i -= new_high_bit_mask) {
+      if (static_cast<bool>(i & new_high_bit_mask)) {
+        this->dir_[i] = new_b;
+      }
+    }
     for (size_t i = index; i < this->dir_.size(); i += new_high_bit_mask) {
       if (static_cast<bool>(i & new_high_bit_mask)) {
         this->dir_[i] = new_b;
